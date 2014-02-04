@@ -19,6 +19,7 @@ Highlight
 
 The following constants are exported:
 
+INFO   - name of info type
 WARNING - name of warning type
 ERROR   - name of error type
 
@@ -35,6 +36,7 @@ from . import persist
 #
 # Error types
 #
+INFO = 'info'
 WARNING = 'warning'
 ERROR = 'error'
 
@@ -100,7 +102,7 @@ class HighlightSet:
     @staticmethod
     def clear(view):
         """Clear all marks in the given view."""
-        for error_type in (WARNING, ERROR):
+        for error_type in (INFO, WARNING, ERROR):
             view.erase_regions(MARK_KEY_FORMAT.format(error_type))
             view.erase_regions(GUTTER_MARK_KEY_FORMAT.format(error_type))
 
@@ -123,7 +125,7 @@ class Highlight:
 
     def __init__(self, code=''):
         self.code = code
-        self.marks = {WARNING: [], ERROR: []}
+        self.marks = {INFO: [], WARNING: [], ERROR: []}
         self.mark_style = 'outline'
         self.mark_flags = MARK_STYLES[self.mark_style]
 
@@ -218,12 +220,12 @@ class Highlight:
 
         pos += start
         region = sublime.Region(pos, pos + length)
-        other_type = ERROR if error_type == WARNING else WARNING
+        other_type = ERROR if error_type == WARNING or error_type == INFO else error_type
         i_offset = 0
 
         for i, mark in enumerate(self.marks[other_type].copy()):
             if mark.a == region.a and mark.b == region.b:
-                if error_type == WARNING:
+                if error_type == WARNING or error_type == INFO:
                     return
                 else:
                     self.marks[other_type].pop(i - i_offset)
@@ -334,14 +336,14 @@ class Highlight:
 
         """
 
-        for error_type in (WARNING, ERROR):
+        for error_type in (INFO, WARNING, ERROR):
             self.marks[error_type].extend(other.marks[error_type])
 
         # Errors override warnings on the same line
         for line, error_type in other.lines.items():
             current_type = self.lines.get(line)
 
-            if current_type is None or current_type == WARNING:
+            if current_type is None or current_type == WARNING or current_type == INFO:
                 self.lines[line] = error_type
 
         self.newlines = other.newlines
@@ -364,7 +366,7 @@ class Highlight:
         """
         self.set_mark_style()
 
-        gutter_regions = {WARNING: [], ERROR: []}
+        gutter_regions = { INFO: [], WARNING: [], ERROR: []}
         draw_gutter_marks = persist.settings.get('gutter_theme') != 'None'
 
         if draw_gutter_marks:
@@ -375,7 +377,7 @@ class Highlight:
                 region = sublime.Region(self.newlines[line], self.newlines[line])
                 gutter_regions[error_type].append(region)
 
-        for error_type in (WARNING, ERROR):
+        for error_type in (INFO, WARNING, ERROR):
             if self.marks[error_type]:
                 view.add_regions(
                     MARK_KEY_FORMAT.format(error_type),
@@ -400,7 +402,7 @@ class Highlight:
     @staticmethod
     def clear(view):
         """Clear all marks in the given view."""
-        for error_type in (WARNING, ERROR):
+        for error_type in (INFO, WARNING, ERROR):
             view.erase_regions(MARK_KEY_FORMAT.format(error_type))
             view.erase_regions(GUTTER_MARK_KEY_FORMAT.format(error_type))
 
@@ -412,7 +414,7 @@ class Highlight:
         The next time this object is used to draw, the marks will be cleared.
 
         """
-        for error_type in (WARNING, ERROR):
+        for error_type in (INFO, WARNING, ERROR):
             del self.marks[error_type][:]
             self.lines.clear()
 

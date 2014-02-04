@@ -1238,6 +1238,8 @@ class Linter(metaclass=LinterMeta):
                     error_type = highlight.ERROR
                 elif warning:
                     error_type = highlight.WARNING
+                elif info:
+                    error_type = highlight.INFO
                 else:
                     error_type = self.default_type
 
@@ -1439,10 +1441,10 @@ class Linter(metaclass=LinterMeta):
         """
 
         if match:
-            items = {'line': None, 'col': None, 'error': None, 'warning': None, 'message': '', 'near': None}
+            items = {'line': None, 'col': None, 'error': None, 'warning': None, 'info': None, 'message': '', 'near': None}
             items.update(match.groupdict())
-            line, col, error, warning, message, near = [
-                items[k] for k in ('line', 'col', 'error', 'warning', 'message', 'near')
+            line, col, error, warning, info, message, near = [
+                items[k] for k in ('line', 'col', 'error', 'warning', 'info', 'message', 'near')
             ]
 
             if line is not None:
@@ -1454,9 +1456,9 @@ class Linter(metaclass=LinterMeta):
                 else:
                     col = len(col)
 
-            return match, line, col, error, warning, message, near
+            return match, line, col, error, warning, info, message, near
         else:
-            return match, None, None, None, None, '', None
+            return match, None, None, None, None, None, '', None
 
     def run(self, cmd, code):
         """

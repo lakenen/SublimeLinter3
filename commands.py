@@ -130,7 +130,7 @@ class GotoErrorCommand(sublime_plugin.TextCommand):
         regions = sublime.Selection(view.id())
         regions.clear()
 
-        for error_type in (highlight.WARNING, highlight.ERROR):
+        for error_type in (highlight.INFO, highlight.WARNING, highlight.ERROR):
             regions.add_all(view.get_regions(highlight.MARK_KEY_FORMAT.format(error_type)))
 
         region_to_select = None
@@ -196,7 +196,8 @@ class GotoErrorCommand(sublime_plugin.TextCommand):
     def find_mark_within(cls, view, region):
         """Return the nearest marked region that contains region, or None if none found."""
 
-        marks = view.get_regions(highlight.MARK_KEY_FORMAT.format(highlight.WARNING))
+        marks = view.get_regions(highlight.MARK_KEY_FORMAT.format(highlight.INFO))
+        marks.extend(view.get_regions(highlight.MARK_KEY_FORMAT.format(highlight.WARNING)))
         marks.extend(view.get_regions(highlight.MARK_KEY_FORMAT.format(highlight.ERROR)))
         marks.sort(key=sublime.Region.begin)
 
@@ -556,11 +557,11 @@ class SublimelinterChooseGutterThemeCommand(ChooseSettingCommand):
         pngs = sublime.find_resources('*.png')
 
         for theme in gutter_themes:
-            # Make sure the theme has error.png and warning.png
+            # Make sure the theme has info.png, error.png and warning.png
             exclude = False
             parent = os.path.dirname(theme)
 
-            for name in ('error', 'warning'):
+            for name in ('info', 'error', 'warning'):
                 if '{}/{}.png'.format(parent, name) not in pngs:
                     exclude = True
 

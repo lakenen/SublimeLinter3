@@ -219,6 +219,7 @@ def generate_color_scheme_async():
     scopes = {
         'mark.warning': False,
         'mark.error': False,
+        'mark.info': False,
         'gutter-mark': False
     }
 
@@ -254,11 +255,12 @@ def generate_color_scheme_async():
     sublime.save_settings('Preferences.sublime-settings')
 
 
-def change_mark_colors(error_color, warning_color):
+def change_mark_colors(error_color, warning_color, info_color):
     """Change SublimeLinter error/warning colors in user color schemes."""
 
     error_color = error_color.lstrip('#')
     warning_color = warning_color.lstrip('#')
+    info_color = info_color.lstrip('#')
 
     path = os.path.join(sublime.packages_path(), 'User', '*.tmTheme')
     themes = glob(path)
@@ -270,6 +272,7 @@ def change_mark_colors(error_color, warning_color):
         if re.search(MARK_COLOR_RE.format(r'mark\.error'), text):
             text = re.sub(MARK_COLOR_RE.format(r'mark\.error'), r'\1#{}\2'.format(error_color), text)
             text = re.sub(MARK_COLOR_RE.format(r'mark\.warning'), r'\1#{}\2'.format(warning_color), text)
+            text = re.sub(MARK_COLOR_RE.format(r'mark\.info'), r'\1#{}\2'.format(info_color), text)
 
             with open(theme, encoding='utf8', mode='w') as f:
                 f.write(text)
@@ -1268,13 +1271,27 @@ def center_region_in_view(region, view):
 
 # color-related constants
 
-DEFAULT_MARK_COLORS = {'warning': 'EDBA00', 'error': 'DA2000', 'gutter': 'FFFFFF'}
+DEFAULT_MARK_COLORS = {'info': '71C3F4', 'warning': 'EDBA00', 'error': 'DA2000', 'gutter': 'FFFFFF'}
 
 COLOR_SCHEME_PREAMBLE = '''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 '''
 
 COLOR_SCHEME_STYLES = {
+    'info': '''
+        <dict>
+            <key>name</key>
+            <string>SublimeLinter Info</string>
+            <key>scope</key>
+            <string>sublimelinter.mark.info</string>
+            <key>settings</key>
+            <dict>
+                <key>foreground</key>
+                <string>#{}</string>
+            </dict>
+        </dict>
+    ''',
+
     'warning': '''
         <dict>
             <key>name</key>

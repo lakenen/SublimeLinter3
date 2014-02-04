@@ -187,23 +187,26 @@ class Settings:
 
         error_color = self.settings.get('error_color', '')
         warning_color = self.settings.get('warning_color', '')
+        info_color = self.settings.get('info_color', '')
 
         if (
-            ('error_color' in self.changeset or 'warning_color' in self.changeset) or
-            (self.previous_settings and error_color and warning_color and
+            ('error_color' in self.changeset or 'warning_color' in self.changeset or 'info_color' in self.changeset) or
+            (self.previous_settings and error_color and warning_color and info_color and
              (self.previous_settings.get('error_color') != error_color or
-              self.previous_settings.get('warning_color') != warning_color))
+              self.previous_settings.get('warning_color') != warning_color or
+              self.previous_settings.get('info_color') != info_color))
         ):
             self.changeset.discard('error_color')
             self.changeset.discard('warning_color')
+            self.changeset.discard('info_color')
 
             if (
                 sublime.ok_cancel_dialog(
-                    'You changed the error and/or warning color. '
+                    'You changed the error and/or warning and/or info color. '
                     'Would you like to update the user color schemes '
                     'with the new colors?')
             ):
-                util.change_mark_colors(error_color, warning_color)
+                util.change_mark_colors(error_color, warning_color, info_color)
 
         # If any other settings changed, relint
         if (self.previous_settings or len(self.changeset) > 0):
@@ -285,7 +288,7 @@ class Settings:
         theme = os.path.splitext(os.path.basename(theme_path))[0]
 
         if theme_path.lower() == 'none':
-            gutter_marks['warning'] = gutter_marks['error'] = ''
+            gutter_marks['info'] = gutter_marks['warning'] = gutter_marks['error'] = ''
             return
 
         info = None
@@ -303,7 +306,7 @@ class Settings:
 
             path = os.path.dirname(path)
 
-            for error_type in ('warning', 'error'):
+            for error_type in ('info', 'warning', 'error'):
                 icon_path = '{}/{}.png'.format(path, error_type)
                 gutter_marks[error_type] = icon_path
 
@@ -320,7 +323,7 @@ class Settings:
                 ' and the default is also not available. '
                 'No gutter marks will display.'.format(theme)
             )
-            gutter_marks['warning'] = gutter_marks['error'] = ''
+            gutter_marks['info'] = gutter_marks['warning'] = gutter_marks['error'] = ''
 
 
 if not 'queue' in globals():
@@ -350,7 +353,7 @@ if not 'queue' in globals():
     edits = defaultdict(list)
 
     # Info about the gutter mark icons
-    gutter_marks = {'warning': 'Default', 'error': 'Default', 'colorize': True}
+    gutter_marks = {'info': 'Default', 'warning': 'Default', 'error': 'Default', 'colorize': True}
 
     # Whether sys.path has been imported from the system.
     sys_path_imported = False
